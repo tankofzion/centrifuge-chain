@@ -35,12 +35,10 @@ To start the local environment, follow these steps.
 1. Start the relay chain
    `./scripts/init.sh start-relay-chain`
 
-2. Start the cfg parachain
-    `./scripts/init.sh start-parachain purge`
+2. Start the cfg `development` parachain
+    `PARA_CHAIN_SPEC="development" ./scripts/init.sh start-parachain purge`
 
 3. Start the `statemine-local` parachain
-
-    Copy the content of the `./xcm/bootnodes` file and replace the `<bootnodes>` bit below with said contents.
 
     ``` bash
     ./xcm/bin/polkadot-collator \
@@ -51,15 +49,24 @@ To start the local environment, follow these steps.
     --execution wasm \
     --chain ./res/rococo-local.json \
     --port 30335 \
-    <bootnodes>
+    $(cat xcm/bootnodes)
     ```
 
-4. Onboard the cfg parachain
+4. Onboard the `development` parachain
+
+   4.1 Get the genesis head by running:
+     `PARA_CHAIN_SPEC="development" ./scripts/init.sh onboard-parachain`
+
+   4.2 Onboard the parachain through the Relay chain dashboard on polkadot JS
+       Remember to pick the `development` runtime wasm: `target/release/wbuild/development-runtime/development_runtime.compact.compressed.wasm`
+
 
 5. Onboard the `statemine-local` parachain
 
-   5.1 Export the genesis state 
+   5.1 Export the genesis state
    `./bin/polkadot-collator export-genesis-state --chain statemine-local --parachain-id 42 > statemine-local-genesis-state`
 
    5.2 Export the genesis wasm
    `./bin/target/release/polkadot-collator export-genesis-wasm --chain statemine-local  > statemine-local-genesis-wasm`
+
+   5.3 Onboard the parachain through the Relay chain dashboard on polkadot JS
