@@ -24,12 +24,12 @@ To start the local environment, follow these steps.
     NOTE: we use cumulus' revision `c02514d8` for now.
 
    ``` bash
-   git clone https://github.com/paritytech/cumulus
+   git clone git@github.com:NunoAlexandre/cumulus.git
    cd cumulus
-   git checkout c02514d8
+   git checkout nuno/polkadot-v0.9.12
    cargo build --release
 
-   cp ./target/release/polkadot-collator ../xcm/bim
+   cp ./target/release/polkadot-collator ../centrifuge-chain/xcm/bim
    ```
 
 1. Start the relay chain
