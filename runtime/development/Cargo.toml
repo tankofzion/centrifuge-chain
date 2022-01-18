@@ -99,6 +99,7 @@ pallet-treasury = { git = "https://github.com/paritytech/substrate", default-fea
 # orml pallets
 orml-tokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "polkadot-v0.9.12" }
 orml-traits = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "polkadot-v0.9.12" }
+orml-xtokens = { git = "https://github.com/open-web3-stack/open-runtime-module-library", default-features = false, branch = "polkadot-v0.9.12" }
 
 runtime-common = { path = "../common", default-features = false }
 primitives-tokens = { path = "../../primitives/tokens", default-features = false }
@@ -181,7 +182,6 @@ std = [
     "cumulus-ping/std",
     "pallet-aura/std",
     "sp-consensus-aura/std",
-    "orml-tokens/std",
     "pallet-fees/std",
     "pallet-anchors/std",
     "pallet-claims/std",
@@ -190,6 +190,7 @@ std = [
     "runtime-common/std",
     "pallet-uniques/std",
     "orml-tokens/std",
+    "orml-xtokens/std",
     "pallet-loan/std",
     "primitives-tokens/std",
     "pallet-treasury/std"

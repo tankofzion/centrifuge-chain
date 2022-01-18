@@ -7,7 +7,7 @@
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame_support::{
 	construct_runtime, match_type, parameter_types,
-	traits::{Contains, Everything, InstanceFilter, LockIdentifier, U128CurrencyToVote, Nothing},
+	traits::{Contains, Everything, InstanceFilter, Get, LockIdentifier, U128CurrencyToVote, Nothing},
 	weights::{
 		constants::{BlockExecutionWeight, ExtrinsicBaseWeight},
 		DispatchClass, IdentityFee, Weight,
@@ -930,6 +930,7 @@ construct_runtime!(
         PolkadotXcm: pallet_xcm::{Pallet, Call, Event<T>, Origin} = 121,
         CumulusXcm: cumulus_pallet_xcm::{Pallet, Event<T>, Origin} = 122,
         DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 123,
+		XTokens: orml_xtokens::{Pallet, Storage, Call, Event<T>} = 124,
 
 		// 3rd party pallets
 		Tokens: orml_tokens::{Pallet, Storage, Event<T>, Config<T>} = 150,
@@ -941,6 +942,63 @@ construct_runtime!(
 		Spambot: cumulus_ping::{Pallet, Call, Storage, Event<T>} = 201,
 	}
 );
+
+impl orml_xtokens::Config for Runtime {
+	type Event = Event;
+	type Balance = Balance;
+	type CurrencyId = CurrencyId;
+	type CurrencyIdConvert = CurrencyIdConvert;
+	type AccountIdToMultiLocation = AccountIdToMultiLocation;
+	type SelfLocation = SelfLocation;
+	type XcmExecutor = XcmExecutor<XcmConfig>;
+	type Weigher = FixedWeightBounds<UnitWeightCost, Call, MaxInstructions>;
+	type BaseXcmWeight = BaseXcmWeight;
+	type LocationInverter = LocationInverter<Ancestry>;
+}
+
+pub struct AccountIdToMultiLocation;
+impl Convert<AccountId, MultiLocation> for AccountIdToMultiLocation {
+	fn convert(account: AccountId) -> MultiLocation {
+		X1(AccountId32 {
+			network: NetworkId::Any,
+			id: account.into(),
+		})
+			.into()
+	}
+}
+
+parameter_types! {
+	pub const BaseXcmWeight: Weight = 100_000_000;
+}
+
+pub struct CurrencyIdConvert;
+impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
+	fn convert(_: CurrencyId) -> Option<MultiLocation> {
+		None
+	}
+}
+impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
+	fn convert(_: MultiLocation) -> Option<CurrencyId> {
+		None
+	}
+}
+impl Convert<MultiAsset, Option<CurrencyId>> for CurrencyIdConvert {
+	fn convert(asset: MultiAsset) -> Option<CurrencyId> {
+		if let MultiAsset {
+			id: Concrete(location), ..
+		} = asset
+		{
+			Self::convert(location)
+		} else {
+			None
+		}
+	}
+}
+
+parameter_types! {
+	pub SelfLocation: MultiLocation = MultiLocation::new(1, X1(Parachain(ParachainInfo::get().into())));
+}
+
 
 impl cumulus_ping::Config for Runtime {
 	type Event = Event;
@@ -1140,7 +1198,7 @@ pub type FungiblesTransactor = FungiblesAdapter<
 
 use sp_std::marker::PhantomData;
 use frame_support::traits::fungibles;
-use sp_runtime::traits::Zero;
+use sp_runtime::traits::{Zero, Convert, AccountIdConversion};
 
 /// This is defined in cumulus but it doesn't seem made available to the world so it's copy-pasted here.
 /// Allow checking in assets that have issuance > 0.
