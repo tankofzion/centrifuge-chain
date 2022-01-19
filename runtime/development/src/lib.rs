@@ -971,25 +971,36 @@ parameter_types! {
 	pub const BaseXcmWeight: Weight = 100_000_000;
 }
 
+fn native_currency_location(id: CurrencyId) -> MultiLocation {
+	MultiLocation::new(1, X2(Parachain(ParachainInfo::get().into()), GeneralKey(id.encode())))
+}
+
 pub struct CurrencyIdConvert;
 impl Convert<CurrencyId, Option<MultiLocation>> for CurrencyIdConvert {
-	fn convert(_: CurrencyId) -> Option<MultiLocation> {
-		None
+	fn convert(id: CurrencyId) -> Option<MultiLocation> {
+		//NOTE: naive implementation
+		match id {
+			CurrencyId::Usd => Some(MultiLocation::parent()),
+			CurrencyId::Tranche(_,_) => Some(native_currency_location(id))
+		}
 	}
 }
 impl Convert<MultiLocation, Option<CurrencyId>> for CurrencyIdConvert {
-	fn convert(_: MultiLocation) -> Option<CurrencyId> {
+	fn convert(location: MultiLocation) -> Option<CurrencyId> {
+		if location == MultiLocation::parent() {
+			return Some(CurrencyId::Usd);
+		}
+
+		//TODO(nuno): handle the CurrencyId::Tranche variant
 		None
 	}
 }
 impl Convert<MultiAsset, Option<CurrencyId>> for CurrencyIdConvert {
 	fn convert(asset: MultiAsset) -> Option<CurrencyId> {
-		if let MultiAsset {
-			id: Concrete(location), ..
-		} = asset
-		{
+		if let MultiAsset { id: Concrete(location), .. } = asset {
 			Self::convert(location)
-		} else {
+		}
+		else {
 			None
 		}
 	}
