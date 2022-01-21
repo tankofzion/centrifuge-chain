@@ -26,13 +26,13 @@ start-parachain)
   cargo build --release
   if [ "$2" == "purge" ]; then
     echo "purging parachain..."
-    rm -rf /tmp/centrifuge-chain
+    rm -rf /tmp/centrifuge-chain-${para_id}
   fi
 
   ./scripts/run_collator.sh \
     --chain="${parachain}" --alice \
     --parachain-id="${para_id}" \
-    --base-path=/tmp/centrifuge-chain/data \
+    --base-path=/tmp/centrifuge-chain-${para_id}/data \
     --wasm-execution=compiled \
     --execution=wasm \
     --port 30355 \
