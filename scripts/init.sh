@@ -46,6 +46,34 @@ start-parachain)
     --log="main,debug" \
   ;;
 
+start-parachain-other)
+  parachain="development"
+  para_id="${PARA_ID:-3000}"
+  echo "Building parachain $parachain with para id $para_id ..."
+  cargo build --release
+
+  if [ "$2" == "purge" ]; then
+    echo "purging parachain..."
+    rm -rf /tmp/centrifuge-chain-${para_id}
+  fi
+
+  ./scripts/run_collator.sh \
+    --chain="${parachain}" --alice \
+    --parachain-id="${para_id}" \
+    --base-path=/tmp/centrifuge-chain-${para_id}/data \
+    --wasm-execution=compiled \
+    --execution=wasm \
+    --port 30356 \
+    --rpc-port 9937 \
+    --ws-port 9947 \
+    --rpc-external \
+    --rpc-cors all \
+    --ws-external \
+    --rpc-methods=Unsafe \
+    --state-cache-size 0 \
+    --log="main,debug" \
+  ;;
+
 onboard-parachain)
   yarn global add @polkadot/api-cli@0.32.1
   genesis=$(./target/release/centrifuge-chain export-genesis-state --chain="${parachain}" --parachain-id="${para_id}")
