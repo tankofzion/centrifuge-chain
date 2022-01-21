@@ -1040,8 +1040,8 @@ impl xcm_executor::Config for XcmConfig {
 }
 
 pub type Barrier = (
-	TakeWeightCredit,
-	AllowTopLevelPaidExecutionFrom<Everything>,
+	// TakeWeightCredit,
+	// AllowTopLevelPaidExecutionFrom<Everything>,
 	AllowUnpaidExecutionFrom<Everything>,
 	// AllowUnpaidExecutionFrom<SpecParachain>,
 	// ^^^ Parent and its exec plurality get free execution
